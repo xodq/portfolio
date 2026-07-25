@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>xoddx</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a; --fg:#e0e0e0; --dim:#555; --dimmer:#333;
+  --line:#1a1a1a; --hot:#8dff5e; --panel:#0e0e0e;
+}
+html,body{background:var(--bg);color:var(--fg)}
+body{
+  font-family:ui-monospace,'SF Mono',Menlo,monospace;
+  line-height:1.7; padding:48px 24px 96px; max-width:1100px; margin:0 auto;
+  -webkit-font-smoothing:antialiased;
+}
+.dim{color:var(--dimmer)}
+h1{font-size:18px;font-weight:400;margin-bottom:4px}
+.sub{color:#666;font-size:13px;margin-bottom:56px;line-height:1.9}
+.pref{color:#8a8a8a}
+.pref b{color:var(--hot);font-weight:400}
+.label{
+  color:var(--dim);font-size:12px;margin-bottom:16px;
+  text-transform:uppercase;letter-spacing:1.5px;
+}
+
+/* ---------- big horizontal project bars ---------- */
+.bars{border-top:1px solid var(--line)}
+.bar{
+  position:relative; display:flex; align-items:baseline; gap:20px;
+  padding:13px 20px; border-bottom:1px solid var(--line);
+  cursor:pointer; overflow:hidden; background:transparent;
+  transition:background .22s ease, padding-left .22s ease;
+}
+.bar::before{
+  content:''; position:absolute; inset:0; background:var(--hot);
+  transform:scaleX(0); transform-origin:left; opacity:.07;
+  transition:transform .38s cubic-bezier(.16,1,.3,1);
+}
+.bar:hover::before{transform:scaleX(1)}
+.bar:hover{padding-left:32px}
+.bar-idx{
+  font-size:11px;color:var(--dimmer);min-width:26px;
+  transition:color .22s ease;
+}
+.bar:hover .bar-idx{color:var(--hot)}
+.bar-title{
+  font-size:clamp(20px,3vw,30px); line-height:1.15; letter-spacing:-.5px;
+  font-weight:400; transition:color .22s ease;
+}
+.bar:hover .bar-title{color:#fff}
+.bar-tag{
+  margin-left:auto; font-size:11px; color:var(--dimmer);
+  text-transform:uppercase; letter-spacing:1px; white-space:nowrap;
+  transition:color .22s ease;
+}
+.bar:hover .bar-tag{color:var(--dim)}
+
+/* ---------- hover preview: image overlay + desc underneath ---------- */
+#preview{
+  position:fixed; pointer-events:none; z-index:40;
+  width:340px; opacity:0; transform:translateY(8px);
+  transition:opacity .2s ease, transform .3s cubic-bezier(.16,1,.3,1);
+}
+#preview.on{opacity:1;transform:translateY(0)}
+#preview .pv-img{
+  position:relative; width:100%; aspect-ratio:4/3;
+  background:#000; border:1px solid #222; overflow:hidden;
+}
+#preview .pv-img img{
+  width:100%;height:100%;object-fit:contain;
+  opacity:.62; filter:contrast(1.1) saturate(.9);
+}
+#preview .pv-img::after{
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(160deg,rgba(141,255,94,.12),transparent 55%,rgba(0,0,0,.55));
+}
+#preview .pv-desc{
+  font-size:11.5px; color:#8a8a8a; line-height:1.6;
+  padding:10px 2px 0; border-top:1px solid #1e1e1e; margin-top:8px;
+}
+
+/* ---------- along the way ---------- */
+.atw-head{margin:80px 0 6px}
+.atw-note{font-size:11.5px;color:var(--dimmer);margin-bottom:20px}
+.atw{
+  display:grid; gap:1px; background:var(--line);
+  grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
+  border:1px solid var(--line);
+}
+.atw-item{
+  background:var(--bg); padding:16px; cursor:pointer;
+  transition:background .2s ease;
+}
+.atw-item:hover{background:#111}
+.atw-thumb{
+  width:100%; aspect-ratio:4/3; background:#000; overflow:hidden;
+  margin-bottom:10px; border:1px solid #191919;
+}
+.atw-thumb img{
+  width:100%;height:100%;object-fit:cover;
+  opacity:.5; transition:opacity .3s ease, transform .5s ease;
+}
+.atw-item:hover .atw-thumb img{opacity:.88;transform:scale(1.04)}
+.atw-name{font-size:13px;color:#ccc;margin-bottom:3px}
+.atw-item:hover .atw-name{color:#fff}
+.atw-sub{font-size:11px;color:var(--dimmer);line-height:1.5}
+/* toggle strip for items that carry more than one clip */
+.atw-thumb{position:relative}
+.atw-sw{
+  position:absolute; bottom:0; left:0; right:0; z-index:2;
+  display:flex; gap:1px; background:rgba(0,0,0,.55);
+}
+.atw-sw button{
+  flex:1; background:rgba(0,0,0,.4); border:none; cursor:pointer;
+  font:inherit; font-size:9.5px; letter-spacing:.5px; color:#777;
+  padding:4px 2px; transition:.18s;
+}
+.atw-sw button:hover{color:#ccc;background:rgba(0,0,0,.7)}
+.atw-sw button.on{color:var(--hot);background:rgba(141,255,94,.1)}
+
+.disclaimer{
+  margin-top:56px; padding:14px 16px; border:1px solid #1c1c1c;
+  background:#0c0c0c; font-size:11.5px; color:#6a6a6a; line-height:1.65;
+}
+.disclaimer b{color:var(--hot);font-weight:400;letter-spacing:1px;font-size:10.5px}
+
+/* ---------- detail modal ---------- */
+#modal{
+  position:fixed; inset:0; z-index:80; display:none;
+  background:rgba(5,5,5,.94); backdrop-filter:blur(6px);
+  padding:32px 24px; overflow-y:auto;
+}
+#modal.on{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.m-wrap{max-width:1100px;margin:0 auto}
+.m-top{
+  display:flex;align-items:flex-start;gap:20px;
+  padding-bottom:18px;border-bottom:1px solid #1c1c1c;
+}
+.m-title{font-size:clamp(24px,4vw,38px);line-height:1;letter-spacing:-1px}
+.m-tag{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-top:8px}
+.m-close{
+  margin-left:auto;background:none;border:1px solid #222;color:var(--dim);
+  font:inherit;font-size:11px;padding:7px 13px;cursor:pointer;
+  letter-spacing:1px;transition:.2s;
+}
+.m-close:hover{border-color:var(--hot);color:var(--hot)}
+
+/* stage tabs across the top */
+.stages{display:flex;flex-wrap:wrap;gap:1px;margin:22px 0 20px;background:#181818}
+.stage{
+  flex:1 1 auto; background:var(--bg); border:none; cursor:pointer;
+  font:inherit; font-size:11.5px; color:var(--dim); text-align:left;
+  padding:13px 15px; letter-spacing:.5px; transition:.2s;
+  border-bottom:2px solid transparent; min-width:150px;
+}
+.stage:hover{color:#bbb;background:#101010}
+.stage.on{color:var(--hot);border-bottom-color:var(--hot);background:#101010}
+.stage b{display:block;font-weight:400;font-size:10px;color:var(--dimmer);margin-bottom:3px}
+.stage.on b{color:#4a7a38}
+
+/* stage body: big image left, thumb selector right */
+.m-body{display:grid;grid-template-columns:1fr 108px;gap:18px;align-items:start}
+.m-stage-wrap{min-width:0}
+.m-stage{
+  position:relative; width:100%; aspect-ratio:16/10; background:#060606;
+  border:1px solid #1c1c1c; overflow:hidden;
+}
+.m-stage img{
+  width:100%;height:100%;object-fit:contain;
+  animation:pop .35s cubic-bezier(.16,1,.3,1);
+}
+@keyframes pop{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:scale(1)}}
+#m-flag{
+  position:absolute; top:12px; left:12px; z-index:2; display:none;
+  font-size:10.5px; letter-spacing:2px; color:#ff6b6b;
+  border:1px solid rgba(255,107,107,.45); background:rgba(20,4,4,.72);
+  padding:5px 10px; pointer-events:none;
+}
+#m-flag.on{display:block}
+.m-cap{font-size:11px;color:var(--dimmer);padding:9px 2px 0}
+.m-desc{
+  font-size:12.5px;color:#9a9a9a;line-height:1.75;
+  margin-top:14px;padding-top:14px;border-top:1px solid #1a1a1a;max-width:66ch;
+}
+.m-desc strong{color:#ccc;font-weight:400}
+
+.picker{display:flex;flex-direction:column;gap:8px}
+.pick{
+  width:100%;aspect-ratio:1;background:#000;border:1px solid #1e1e1e;
+  padding:0;cursor:pointer;overflow:hidden;transition:.2s;
+}
+.pick img{width:100%;height:100%;object-fit:cover;opacity:.45;transition:opacity .2s}
+.pick:hover{border-color:#3c3c3c}
+.pick:hover img{opacity:.8}
+.pick.on{border-color:var(--hot)}
+.pick.on img{opacity:1}
+
+footer{margin-top:80px;font-size:11px;color:#2a2a2a}
+
+@media(max-width:720px){
+  #preview{display:none}
+  .m-body{grid-template-columns:1fr}
+  .picker{flex-direction:row;overflow-x:auto}
+  .pick{width:74px;flex:0 0 74px}
+}
+</style>
+</head>
+<body>
+
+<h1>xoddx <span class="dim">/ portfolio</span></h1>
+<p class="sub"><span class="pref">preferred contact: discord <b>ddxoxd</b></span><br>
+xoddx@proton.me &nbsp;/&nbsp; 773 536 9010</p>
+
+<p class="label">projects</p>
+<div class="bars" id="bars"></div>
+
+<p class="label atw-head">along the way</p>
+<p class="atw-note">smaller builds and dead ends that fed the finals</p>
+<div class="atw" id="atw"></div>
+
+<div class="disclaimer">
+  <b>STILL BUILDING</b><br>
+  This site is ever growing and nowhere near finished. Projects get added as they get
+  documented, and the ones already here are still moving. Check back.
+</div>
+
+<footer>&copy; xoddx</footer>
+
+<div id="preview">
+  <div class="pv-img"><img id="pv-img" alt=""></div>
+  <div class="pv-desc" id="pv-desc"></div>
+</div>
+
+<div id="modal">
+  <div class="m-wrap">
+    <div class="m-top">
+      <div>
+        <div class="m-title" id="m-title"></div>
+        <div class="m-tag" id="m-tag"></div>
+      </div>
+      <button class="m-close" id="m-close">ESC / CLOSE</button>
+    </div>
+    <div class="stages" id="stages"></div>
+    <div class="m-body">
+      <div class="m-stage-wrap">
+        <div class="m-stage"><div id="m-flag">(NONFUNCTIONAL) DOES NOT FIRE / DEMONSTRATION ONLY</div><img id="m-img" alt=""></div>
+        <div class="m-cap" id="m-cap"></div>
+        <div class="m-desc" id="m-desc"></div>
+      </div>
+      <div class="picker" id="picker"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==== data ==== */
+const P=[
+{
+  id:'bike', title:'bike', tag:'electric motorbike + robotics',
+  hero:'ebikefinal.png',
+  blurb:'gas pit bike stripped to the frame, rebuilt electric, then handed over to a controller that rides it without a human on the seat.',
+  stages:[
+    {n:'stage 01',name:'electric conversion',
+     desc:'Built the pack by hand, <strong>salvaged 18650 cells, capacity-matched, nickel-strip spot welded</strong> into a series-parallel block sized to the frame cavity. Mid-drive motor onto the reworked mounts, chain drive to the stock rear sprocket, ESC on the tray from stage one. First real load test was a burnout against the wall.',
+     imgs:[
+       {src:'ebikefinal.png',cap:'finished conversion'},
+       {src:'liionbatteryreconstruction.jpg',cap:'li-ion pack reconstruction, spot-welded nickel strip'},
+       {src:'gif_burnout.gif',cap:'first loaded pull, burnout test'}
+     ]},
+    {n:'stage 02',name:'robotics implementation',
+     desc:'Arduino + IMU + steering servo strapped to the bars so the bike balances itself. Control law is <strong>countersteer to a target roll angle, then correct back to vertical using yaw error</strong>, the same thing a rider does without thinking. Policy was pretrained in a MuJoCo model of the bike with PPO before anything ran on hardware, and there is a failsafe cut on the throttle line.',
+     imgs:[
+       {src:'gif_bikerobotics.gif',cap:'self-balancing run in the garage'},
+       {src:'gif_sim.gif',cap:'MuJoCo sim, PPO policy training rollout'}
+     ]}
+  ]
+},
+{
+  id:'tail', title:'tail', tag:'animatronic fursuit tail',
+  hero:'cut_tail.png',
+  blurb:'segmented tail driven off a single high-torque servo, cable-actuated so the whole spine curls from one input.',
+  stages:[
+    {n:'stage 01',name:'linkage design',
+     desc:'Each vertebra is a printed segment on a shared cable run, so <strong>one 35kg servo at the base moves the entire spine</strong> instead of a motor per joint. Segments taper toward the tip so the curl looks natural rather than uniform. Printed in durable TPU on a <strong>new bearingless design, partial M3 rods join the segments</strong> instead of bearings, and the mounting plate is a simple belt clip so it goes on and off without any harness.',
+     imgs:[
+       {src:'cut_tail.png',cap:'CAD, 35kg servo, mount plate, tapered segment chain'}
+     ]},
+    {n:'stage 02',name:'motion test',
+     desc:'Printed, strung and driven. <strong>Cable tension is the whole game</strong>, too loose and the tip lags the base badly, too tight and the servo stalls at the end of travel. Ended up tuning tension per segment to get a wave that reads as one continuous motion.',
+     imgs:[
+       {src:'gif_tail.gif',cap:'assembled tail under servo drive'}
+     ]}
+  ]
+},
+{
+  id:'rcflame', title:'rcflame', tag:'remote controlled flame torrent',
+  hero:'flamethrower.jpg',
+  blurb:'combat robot chassis with a rack-driven butane feed and nichrome ignition on the front.',
+  stages:[
+    {n:'stage 01',name:'ignition payload',
+     desc:'The <strong>rack and pinion drives the butane can forward into a slightly larger nozzle</strong>, and that is what fires it. Pushing the can into the nozzle opens it and the fuel sprays out, so the rack is the trigger rather than an aiming mechanism. Ignition is a <strong>nichrome wire run off a 40A ESC</strong>, sitting in the spray path and glowing hot enough to light it. Feed runs on its own RC channel so it cannot fire from a drive input, and the receiver, ESC and battery are strapped down behind the can.',
+     imgs:[
+       {src:'flamethrower.jpg',cap:'assembled: butane can, rack and pinion feed, nichrome igniter'},
+       {src:'gif_flame.gif',cap:'live fire test'}
+     ]}
+  ]
+},
+{
+  id:'smgprototype', title:'smgprototype', tag:'metal + polymer prototype fabrication',
+  nonfunctional:1,
+  hero:'smg.png',
+  blurb:'nonfunctional demonstration build. does not fire, barrel deliberately undersized, blank rounds only. 4mm steel frame, aluminium slide, printed furniture.',
+  stages:[
+    {n:'stage 01',name:'CAD assembly',
+     desc:'Designed as a complete assembly rather than loose parts so travel and clearance could be checked before anything got cut. <strong>The bolt uses a dual-rail design taken from the M3 grease gun</strong>, and the overall architecture is closest to a PA Luty, but every part is my own design, worked out by studying WW2 machine guns, watching teardowns and reverse-engineering how the mechanisms actually index. Modelled both ways, suppressed and unsuppressed.',
+     imgs:[
+       {src:'smg.png',cap:'CAD, suppressor fitted'},
+       {src:'smgbare.png',cap:'CAD, without suppressor'}
+     ]},
+    {n:'stage 02',name:'steel fabrication',
+     desc:'Frame was <strong>custom cut out of 4mm thick steel</strong> and welded up, with aluminium brackets clamped on as extra support to hold everything square through the welding. Collars retain the ECM\'d barrel in the frame. My machine tops out at aluminium, so I CNC\'d the aluminium brackets and the smaller parts and cut the steel by hand. All the plastics and the magazine are 3D printed, which kept iteration cheap while the metal parts stayed fixed.',
+     imgs:[
+       {src:'gif_smgframe.gif',cap:'welded steel frame'},
+       {src:'smgIRL.jpg',cap:'assembled: 4mm steel frame, ECM\'d barrel held in collars'}
+     ]},
+    {n:'stage 03',name:'to be finished',
+     desc:'<strong>This does not fire and is not built to.</strong> The barrel is deliberately undersized, so it is a demonstration piece only, blank rounds at most. What is left is the moving group: the <strong>slide is aluminium with steel fastened between the layers</strong> where the wear and lockup loads would land, and the <strong>trigger sear is still to be machined from steel with the bolt still to be CNC\'d</strong>. It exists to show the fabrication, not to work.',
+     imgs:[
+       {src:'smgIRL.jpg',cap:'current state, moving group still outstanding'},
+       {src:'smgbare.png',cap:'unsuppressed CAD for comparison'}
+     ]}
+  ]
+}
+];
+
+const ATW=[
+{name:'ebike battery pack',sub:'salvaged 18650s, capacity matched and spot welded into a frame-fit block',img:'liionbatteryreconstruction.jpg'},
+{name:'battlebot chassis',sub:'antweight printed chassis on N20 drives, became the rcflame platform',img:'gif_battlebot.gif'},
+{name:'welding + fab practice',sub:'learned to weld on the bike frame itself, which is why the early beads look like that',
+ imgs:[{src:'gif_grinding.gif',cap:'angle grinding'},{src:'gif_welding.gif',cap:'welding'}]},
+{name:'PPO bike sim',sub:'MuJoCo model of the bike so the balance policy could fail somewhere cheap first',img:'gif_sim.gif'}
+];
+
+/* ==== click noise (synthesised, no asset) ==== */
+let AC=null;
+const audio=()=>{
+  if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)();
+  if(AC.state==='suspended') AC.resume();
+  return AC;
+};
+function click(gain=0.05,freq=1900){
+  try{
+    const c=audio(), t=c.currentTime;
+    const o=c.createOscillator(), g=c.createGain(), f=c.createBiquadFilter();
+    f.type='highpass'; f.frequency.value=900;
+    o.type='square'; o.frequency.setValueAtTime(freq,t);
+    o.frequency.exponentialRampToValueAtTime(freq*0.42,t+0.018);
+    g.gain.setValueAtTime(0,t);
+    g.gain.linearRampToValueAtTime(gain,t+0.002);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+0.035);
+    o.connect(f); f.connect(g); g.connect(c.destination);
+    o.start(t); o.stop(t+0.04);
+  }catch(e){}
+}
+
+/* ==== project bars ==== */
+const bars=document.getElementById('bars');
+const pv=document.getElementById('preview');
+const pvImg=document.getElementById('pv-img');
+const pvDesc=document.getElementById('pv-desc');
+
+P.forEach((p,i)=>{
+  const el=document.createElement('div');
+  el.className='bar';
+  el.innerHTML=`<span class="bar-idx">${String(i+1).padStart(2,'0')}</span>`+
+    `<span class="bar-title">${p.title}</span>`+
+    `<span class="bar-tag">${p.tag}</span>`;
+  el.addEventListener('mouseenter',()=>{
+    click(0.045,2100);
+    pvImg.src=p.hero; pvDesc.textContent=p.blurb;
+    pv.classList.add('on');
+  });
+  el.addEventListener('mouseleave',()=>pv.classList.remove('on'));
+  el.addEventListener('click',()=>{click(0.07,1400); openProject(i)});
+  bars.appendChild(el);
+});
+
+document.addEventListener('mousemove',e=>{
+  if(!pv.classList.contains('on'))return;
+  const w=pv.offsetWidth, h=pv.offsetHeight, pad=18;
+  let x=e.clientX+pad, y=e.clientY+pad;
+  if(x+w>innerWidth-pad) x=e.clientX-w-pad;
+  if(y+h>innerHeight-pad) y=Math.max(pad,innerHeight-h-pad);
+  pv.style.left=x+'px'; pv.style.top=y+'px';
+});
+
+/* ==== along the way ==== */
+const atw=document.getElementById('atw');
+ATW.forEach(a=>{
+  const el=document.createElement('div');
+  el.className='atw-item';
+  const set=a.imgs||[{src:a.img,cap:''}];
+  el.innerHTML=`<div class="atw-thumb"><img src="${set[0].src}" alt="" loading="lazy">`+
+    (set.length>1?`<div class="atw-sw">`+set.map((s,i)=>
+      `<button class="${i===0?'on':''}">${s.cap}</button>`).join('')+`</div>`:'')+
+    `</div><div class="atw-name">${a.name}</div><div class="atw-sub">${a.sub}</div>`;
+  el.addEventListener('mouseenter',()=>click(0.03,2400));
+  if(set.length>1){
+    const img=el.querySelector('.atw-thumb img');
+    el.querySelectorAll('.atw-sw button').forEach((btn,i)=>{
+      btn.addEventListener('click',ev=>{
+        ev.stopPropagation();
+        click(0.035,2300);
+        img.src=set[i].src;
+        el.querySelectorAll('.atw-sw button').forEach((b,bi)=>b.classList.toggle('on',bi===i));
+      });
+    });
+  }
+  atw.appendChild(el);
+});
+
+/* ==== modal ==== */
+const modal=document.getElementById('modal');
+const stagesEl=document.getElementById('stages');
+const pickerEl=document.getElementById('picker');
+const mImg=document.getElementById('m-img');
+const mCap=document.getElementById('m-cap');
+const mDesc=document.getElementById('m-desc');
+let cur=0, curStage=0;
+
+function openProject(i){
+  cur=i; curStage=0;
+  const p=P[i];
+  document.getElementById('m-title').textContent=p.title;
+  document.getElementById('m-tag').textContent=p.tag;
+  document.getElementById('m-flag').classList.toggle('on',!!p.nonfunctional);
+  stagesEl.innerHTML='';
+  p.stages.forEach((s,si)=>{
+    const b=document.createElement('button');
+    b.className='stage'+(si===0?' on':'');
+    b.innerHTML=`<b>${s.n}</b>${s.name}`;
+    b.addEventListener('click',()=>{click(0.055,1700); setStage(si)});
+    stagesEl.appendChild(b);
+  });
+  setStage(0);
+  modal.classList.add('on');
+  document.body.style.overflow='hidden';
+}
+
+function setStage(si){
+  curStage=si;
+  const s=P[cur].stages[si];
+  [...stagesEl.children].forEach((b,bi)=>b.classList.toggle('on',bi===si));
+  mDesc.innerHTML=s.desc;
+  pickerEl.innerHTML='';
+  s.imgs.forEach((im,ii)=>{
+    const b=document.createElement('button');
+    b.className='pick'+(ii===0?' on':'');
+    b.innerHTML=`<img src="${im.src}" alt="" loading="lazy">`;
+    b.addEventListener('click',()=>{click(0.04,2200); setImg(ii)});
+    b.addEventListener('mouseenter',()=>click(0.022,2600));
+    pickerEl.appendChild(b);
+  });
+  setImg(0);
+}
+
+function setImg(ii){
+  const im=P[cur].stages[curStage].imgs[ii];
+  mImg.src=im.src; mCap.textContent=im.cap;
+  [...pickerEl.children].forEach((b,bi)=>b.classList.toggle('on',bi===ii));
+}
+
+function closeModal(){
+  modal.classList.remove('on');
+  document.body.style.overflow='';
+}
+document.getElementById('m-close').addEventListener('click',()=>{click(0.05,1200); closeModal()});
+modal.addEventListener('click',e=>{if(e.target===modal){click(0.05,1200); closeModal()}});
+document.addEventListener('keydown',e=>{
+  if(!modal.classList.contains('on'))return;
+  const st=P[cur].stages;
+  if(e.key==='Escape'){click(0.05,1200); closeModal()}
+  if(e.key==='ArrowRight'&&curStage<st.length-1){click(0.055,1700); setStage(curStage+1)}
+  if(e.key==='ArrowLeft'&&curStage>0){click(0.055,1700); setStage(curStage-1)}
+});
+</script>
+</body>
+</html>
