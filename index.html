@@ -261,17 +261,22 @@ xoddx@proton.me &nbsp;/&nbsp; 773 536 9010</p>
 const P=[
 {
   id:'bike', title:'bike', tag:'electric motorbike + robotics',
-  hero:'ebikefinal.png',
+  hero:'gif_bikecover.gif',
   blurb:'gas pit bike stripped to the frame, rebuilt electric, then handed over to a controller that rides it without a human on the seat.',
   stages:[
-    {n:'stage 01',name:'electric conversion',
-     desc:'Built the pack by hand, <strong>salvaged 18650 cells, capacity-matched, nickel-strip spot welded</strong> into a series-parallel block sized to the frame cavity. Mid-drive motor onto the reworked mounts, chain drive to the stock rear sprocket, ESC on the tray from stage one. First real load test was a burnout against the wall.',
+    {n:'stage 01',name:'combustion teardown',
+     desc:'Where it started. Stock gas pit bike, <strong>running engine, exhaust and carb all still on it</strong>. Everything after this came out of stripping it down to the bare frame, pulling the motor, fuel system and exhaust so the cavity could be measured for a pack and the mounts reworked for a mid-drive.',
      imgs:[
-       {src:'ebikefinal.png',cap:'finished conversion'},
+       {src:'bikebeforeconversion.jpg',cap:'stock gas pit bike, before teardown'}
+     ]},
+    {n:'stage 02',name:'electric conversion',
+     desc:'Built the pack by hand, <strong>salvaged 18650 cells, capacity-matched, nickel-strip spot welded</strong> into a series-parallel block sized to the frame cavity. Mid-drive motor onto the reworked mounts, chain drive to the stock rear sprocket, ESC on the tray. First real load test was a burnout against the wall.',
+     imgs:[
+       {src:'gif_bikecover.gif',cap:'finished conversion'},
        {src:'liionbatteryreconstruction.jpg',cap:'li-ion pack reconstruction, spot-welded nickel strip'},
        {src:'gif_burnout.gif',cap:'first loaded pull, burnout test'}
      ]},
-    {n:'stage 02',name:'robotics implementation',
+    {n:'stage 03',name:'robotics implementation',
      desc:'Arduino + IMU + steering servo strapped to the bars so the bike balances itself. Control law is <strong>countersteer to a target roll angle, then correct back to vertical using yaw error</strong>, the same thing a rider does without thinking. Policy was pretrained in a MuJoCo model of the bike with PPO before anything ran on hardware, and there is a failsafe cut on the throttle line.',
      imgs:[
        {src:'gif_bikerobotics.gif',cap:'self-balancing run in the garage'},
@@ -282,15 +287,15 @@ const P=[
 {
   id:'tail', title:'tail', tag:'animatronic fursuit tail',
   hero:'cut_tail.png',
-  blurb:'segmented tail driven off a single high-torque servo, cable-actuated so the whole spine curls from one input.',
+  blurb:'segmented tail driven off a single high-torque servo, working as a pendulum so the whole spine swings from one input.',
   stages:[
     {n:'stage 01',name:'linkage design',
-     desc:'Each vertebra is a printed segment on a shared cable run, so <strong>one 35kg servo at the base moves the entire spine</strong> instead of a motor per joint. Segments taper toward the tip so the curl looks natural rather than uniform. Printed in durable TPU on a <strong>new bearingless design, partial M3 rods join the segments</strong> instead of bearings, and the mounting plate is a simple belt clip so it goes on and off without any harness.',
+     desc:'Each vertebra is a printed segment in a hanging chain, and the <strong>whole thing works like a pendulum</strong>. One 35kg servo at the base swings the chain and the segments follow through on their own momentum, so there is no motor per joint and nothing to tension. Segments taper toward the tip so the swing looks natural rather than uniform. Printed in durable TPU on a <strong>new bearingless design, partial M3 rods join the segments</strong> instead of bearings, and the mounting plate is a simple belt clip so it goes on and off without any harness.',
      imgs:[
        {src:'cut_tail.png',cap:'CAD, 35kg servo, mount plate, tapered segment chain'}
      ]},
     {n:'stage 02',name:'motion test',
-     desc:'Printed, strung and driven. <strong>Cable tension is the whole game</strong>, too loose and the tip lags the base badly, too tight and the servo stalls at the end of travel. Ended up tuning tension per segment to get a wave that reads as one continuous motion.',
+     desc:'Printed and driven. <strong>Getting the swing right is the whole game</strong>, since the motion depends on segment weight and how freely each joint pivots rather than on any tensioning. Too stiff at the rods and the tip never follows through, too loose and it flops instead of carrying the wave. Ended up tuning the joints and the taper until one servo sweep reads as a single continuous motion.',
      imgs:[
        {src:'gif_tail.gif',cap:'assembled tail under servo drive'}
      ]}
@@ -339,9 +344,10 @@ const P=[
 
 const ATW=[
 {name:'ebike battery pack',sub:'salvaged 18650s, capacity matched and spot welded into a frame-fit block',img:'liionbatteryreconstruction.jpg'},
-{name:'battlebot chassis',sub:'antweight printed chassis on N20 drives, became the rcflame platform',img:'gif_battlebot.gif'},
+{name:'battlebot chassis',sub:'antweight printed chassis on N20 drives, became the rcflame platform',
+ imgs:[{src:'battlebotcad.jpg',cap:'CAD',ms:2600},{src:'gif_battlebot.gif',cap:'driving',ms:3500}]},
 {name:'welding + fab practice',sub:'learned to weld on the bike frame itself, which is why the early beads look like that',
- imgs:[{src:'gif_grinding.gif',cap:'angle grinding'},{src:'gif_welding.gif',cap:'welding'}]},
+ imgs:[{src:'gif_grinding.gif',cap:'angle grinding',ms:3000},{src:'gif_welding.gif',cap:'welding',ms:2300}]},
 {name:'PPO bike sim',sub:'MuJoCo model of the bike so the balance policy could fail somewhere cheap first',img:'gif_sim.gif'}
 ];
 
@@ -411,14 +417,32 @@ ATW.forEach(a=>{
   el.addEventListener('mouseenter',()=>click(0.03,2400));
   if(set.length>1){
     const img=el.querySelector('.atw-thumb img');
-    el.querySelectorAll('.atw-sw button').forEach((btn,i)=>{
+    const btns=[...el.querySelectorAll('.atw-sw button')];
+    let cur=0, timer=null;
+    // gifs restart from frame 0 when their src is reassigned, so each clip
+    // gets its own measured runtime and the strip advances when it finishes
+    const show=i=>{
+      cur=i;
+      img.src=set[i].src;
+      btns.forEach((b,bi)=>b.classList.toggle('on',bi===i));
+    };
+    const queue=()=>{
+      clearTimeout(timer);
+      timer=setTimeout(()=>{show((cur+1)%set.length); queue();}, set[cur].ms||3000);
+    };
+    btns.forEach((btn,i)=>{
       btn.addEventListener('click',ev=>{
         ev.stopPropagation();
         click(0.035,2300);
-        img.src=set[i].src;
-        el.querySelectorAll('.atw-sw button').forEach((b,bi)=>b.classList.toggle('on',bi===i));
+        show(i); queue();          // manual pick resets the dwell
       });
     });
+    // only run while the card is actually on screen
+    if('IntersectionObserver' in window){
+      new IntersectionObserver(es=>es.forEach(e=>{
+        if(e.isIntersecting) queue(); else clearTimeout(timer);
+      }),{threshold:.25}).observe(el);
+    } else queue();
   }
   atw.appendChild(el);
 });
