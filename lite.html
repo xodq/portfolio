@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>xoddx / engineering</title>
+<meta name="description" content="Fabrication, embedded control and reverse engineering. Electric motorbike conversion with self-balancing robotics, VAG tuning and custom firmware, animatronic products sold on commission, metal prototype fabrication.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a; --fg:#e0e0e0; --dim:#777; --dimmer:#4a4a4a;
+  --line:#1c1c1c; --hot:#8dff5e;
+}
+html,body{background:var(--bg);color:var(--fg)}
+body{
+  font-family:ui-monospace,'SF Mono',Menlo,monospace;
+  line-height:1.65; padding:44px 24px 80px; max-width:880px; margin:0 auto;
+  -webkit-font-smoothing:antialiased; font-size:13px;
+}
+a{color:inherit}
+h1{font-size:19px;font-weight:400;letter-spacing:-.3px}
+h1 span{color:#3a3a3a}
+.contact{color:var(--dim);font-size:12px;margin-top:6px;line-height:1.9}
+.contact b{color:var(--hot);font-weight:400}
+.lede{
+  font-size:12.5px;color:#9a9a9a;line-height:1.8;max-width:66ch;
+  margin:16px 0 8px;
+}
+.lede b{color:#d5d5d5;font-weight:400}
+.edu{
+  font-size:11.5px;color:var(--dim);border-left:2px solid var(--hot);
+  padding:5px 0 5px 11px;margin:18px 0 44px;
+}
+
+h2{
+  font-size:11px;font-weight:400;color:var(--dim);letter-spacing:1.6px;
+  text-transform:uppercase;margin:0 0 18px;
+  padding-bottom:9px;border-bottom:1px solid var(--line);
+}
+
+/* project rows: image left, facts right, nothing to click */
+.proj{
+  display:grid;grid-template-columns:210px 1fr;gap:22px;
+  padding:20px 0;border-bottom:1px solid var(--line);align-items:start;
+}
+.proj:last-of-type{border-bottom:none}
+.shot{
+  width:100%;aspect-ratio:4/3;background:#060606;border:1px solid var(--line);
+  overflow:hidden;
+}
+.shot img{width:100%;height:100%;object-fit:cover;opacity:.9}
+.shot.fit img{object-fit:contain}
+.ptitle{font-size:15px;margin-bottom:3px}
+.ptag{font-size:10.5px;color:var(--dimmer);letter-spacing:1.1px;text-transform:uppercase;margin-bottom:9px}
+.psum{font-size:12.5px;color:#a8a8a8;line-height:1.7;margin-bottom:10px}
+.psum b{color:#e0e0e0;font-weight:400}
+ul{list-style:none}
+li{
+  font-size:11.5px;color:#8a8a8a;line-height:1.6;padding-left:13px;
+  position:relative;margin-bottom:4px;
+}
+li::before{content:'';position:absolute;left:0;top:7px;width:4px;height:1px;background:#3f3f3f}
+li b{color:#c4c4c4;font-weight:400}
+.sold{
+  display:inline-block;font-size:10px;letter-spacing:1.2px;color:var(--hot);
+  border:1px solid rgba(141,255,94,.35);background:rgba(141,255,94,.06);
+  padding:2px 7px;margin-bottom:9px;
+}
+.note{
+  display:inline-block;font-size:10px;letter-spacing:1.2px;color:#ff8080;
+  border:1px solid rgba(255,128,128,.3);background:rgba(255,128,128,.05);
+  padding:2px 7px;margin-bottom:9px;
+}
+.links{margin-top:9px;display:flex;gap:7px;flex-wrap:wrap}
+.links a{
+  font-size:10px;letter-spacing:.4px;color:var(--dim);text-decoration:none;
+  border:1px solid #242424;padding:3px 8px;transition:.18s;
+}
+.links a:hover{border-color:var(--hot);color:var(--hot)}
+
+/* commission + capability blocks */
+.block{margin-top:52px}
+.comm{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
+.comm div{border-left:1px solid var(--line);padding-left:13px}
+.comm h3{font-size:12.5px;font-weight:400;color:#d5d5d5;margin-bottom:4px}
+.comm p{font-size:11.5px;color:#888;line-height:1.6}
+
+.caps{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:9px 26px}
+.cap{display:grid;grid-template-columns:84px 1fr;gap:10px;font-size:11.5px;padding:3px 0}
+.cap span{color:var(--dimmer);letter-spacing:.6px}
+.cap p{color:#9a9a9a;line-height:1.55}
+
+footer{margin-top:60px;font-size:11px;color:#2e2e2e}
+footer a{color:#444;text-decoration:none}
+footer a:hover{color:var(--hot)}
+
+@media(max-width:620px){
+  .proj{grid-template-columns:1fr;gap:12px}
+  .shot{max-width:260px}
+  .cap{grid-template-columns:1fr;gap:0}
+}
+</style>
+</head>
+<body>
+
+<h1>xoddx <span>/ engineering</span></h1>
+<p class="contact">discord <b>ddxoxd</b> &nbsp;/&nbsp; xoddx@proton.me &nbsp;/&nbsp; 773 536 9010</p>
+
+<p class="lede"><b>Fabrication, embedded control and reverse engineering.</b>
+I cut and weld the steel, design and print the parts, build the electronics and write
+the firmware and control code that runs them. Everything below was taken from nothing
+to working, mostly from salvage.</p>
+
+<p class="edu">Pre-engineering associate's, BCTC. Completing at 17.</p>
+
+<h2>projects</h2>
+
+<div class="proj">
+  <div class="shot"><img src="gif_bikecover.gif" alt="electric dirtbike" loading="lazy"></div>
+  <div>
+    <div class="ptitle">self-balancing electric dirtbike</div>
+    <div class="ptag">mechanical / power electronics / controls</div>
+    <p class="psum">Gas pit bike stripped to the bare frame, rebuilt electric, then handed to a
+    controller that rides it with nobody on the seat.</p>
+    <ul>
+      <li><b>QS165 mid-drive</b>, chain to the stock rear sprocket, Fardriver ND72360 controller</li>
+      <li><b>72V 20Ah pack built by hand</b> from salvaged, capacity-matched 18650s, nickel strip spot welded</li>
+      <li>Arduino + BNO055 IMU, <b>110 Hz balance loop</b>, countersteer to a target roll angle then correct on yaw error</li>
+      <li>Steering via linear actuator regeared 5:1 through an IBT2 H-bridge, failsafe cut on the throttle line</li>
+      <li><b>PPO policy pretrained in MuJoCo</b> so it could fail in simulation before touching hardware</li>
+    </ul>
+  </div>
+</div>
+
+<div class="proj">
+  <div class="shot fit"><img src="cl_deck-flash.png" alt="clusterleg deck" loading="lazy"></div>
+  <div>
+    <div class="ptitle">clusterleg</div>
+    <div class="ptag">firmware reverse engineering / tooling</div>
+    <p class="psum">Tuning, flashing and custom firmware for Volkswagen Auto Group cars, tested on
+    my own 2017 A3. Built on top of <b>VW_Flash</b>, where most of the credit goes.</p>
+    <ul>
+      <li><b>Binary-patched the ESP32 CAN bridge firmware</b> to reach the instrument cluster: dumped the image, retargeted an unused link's CAN IDs, re-fixed the checksum and SHA-256 so it still boots</li>
+      <li>Worked out VW's coding login order from a <b>UDS 0x24</b> refusal, then built a long-coding tool with backup, readback verification and restore to stock</li>
+      <li>Desktop deck wrapping every action, <b>resumable block flashing</b> to recover a hung flash, dry run until confirmed</li>
+      <li><b>32 offline tests</b> against a simulated cluster</li>
+      <li>Tunes written by me</li>
+    </ul>
+    <div class="links">
+      <a href="https://github.com/xodq/clusterleg" target="_blank" rel="noopener noreferrer">repo</a>
+      <a href="https://github.com/bri3d/VW_Flash" target="_blank" rel="noopener noreferrer">built on VW_Flash</a>
+    </div>
+  </div>
+</div>
+
+<div class="proj">
+  <div class="shot"><img src="gif_tail.gif" alt="animatronic tail" loading="lazy"></div>
+  <div>
+    <div class="ptitle">animatronic tail</div>
+    <div class="ptag">product design / mechanism</div>
+    <span class="sold">DESIGNED, SOLD AND BUILT ON COMMISSION</span>
+    <p class="psum">Segmented tail that swings as a <b>pendulum</b> off a single 35kg servo, so the
+    whole spine follows through on its own momentum with no motor per joint.</p>
+    <ul>
+      <li>Printed in <b>TPU</b>, bearingless design using partial M3 rods instead of bearings</li>
+      <li>Segments taper toward the tip so the swing reads natural rather than uniform</li>
+      <li>Belt clip mount, no harness needed</li>
+      <li>Taken from prototype to a product people have paid for</li>
+    </ul>
+  </div>
+</div>
+
+<div class="proj">
+  <div class="shot"><img src="smgIRL.jpg" alt="prototype fabrication" loading="lazy"></div>
+  <div>
+    <div class="ptitle">smgprototype</div>
+    <div class="ptag">cad / metal fabrication demonstration</div>
+    <span class="note">NONFUNCTIONAL / DOES NOT FIRE</span>
+    <p class="psum">A CAD and fabrication demonstration piece. <b>Does not fire and is not built to</b>,
+    the barrel is deliberately undersized. Designed as a complete assembly first so travel and
+    clearance could be checked before anything was cut.</p>
+    <ul>
+      <li><b>4mm steel frame</b> cut by hand and welded, aluminium brackets clamped on to hold it square through the heat</li>
+      <li><b>Aluminium slide with steel laminated between the layers</b> at the wear and lockup points</li>
+      <li>Barrel finished by <b>electrochemical machining</b>, retained in collars</li>
+      <li>Every part my own design, worked out by studying teardowns and reverse-engineering how the mechanisms index</li>
+    </ul>
+  </div>
+</div>
+
+<div class="proj">
+  <div class="shot"><img src="flamethrower.jpg" alt="rcflame" loading="lazy"></div>
+  <div>
+    <div class="ptitle">rcflame</div>
+    <div class="ptag">rc mechanism / actuation</div>
+    <p class="psum">Combat robot chassis with a butane ignition payload driven off a
+    <b>rack and pinion</b> that pushes the can forward into a larger nozzle to open it.</p>
+    <ul>
+      <li>Ignition by <b>nichrome wire run off a 40A ESC</b>, sitting in the spray path</li>
+      <li>Feed on its own RC channel so it cannot fire from a drive input</li>
+      <li>Built on an antweight printed chassis running N20 gearmotor drives</li>
+    </ul>
+  </div>
+</div>
+
+<div class="block">
+<h2>commission + repair work</h2>
+<div class="comm">
+  <div>
+    <h3>electric wheelchair batteries</h3>
+    <p>Paid repair work on 24V packs for a local mobility centre, including new battery
+    level indicators I retrofitted using ESP32 nanos.</p>
+  </div>
+  <div>
+    <h3>animatronic tails</h3>
+    <p>Designed, built and sold to customers, with further commissions on.</p>
+  </div>
+  <div>
+    <h3>ninebot z10 revival</h3>
+    <p>Wheel written off as totaled, diagnosed and repaired back to balancing on its own.</p>
+  </div>
+</div>
+</div>
+
+<div class="block">
+<h2>capabilities</h2>
+<div class="caps">
+  <div class="cap"><span>fabrication</span><p>Welding steel, cutting plate by hand, grinding and finishing, fixturing for weld distortion</p></div>
+  <div class="cap"><span>machining</span><p>CNC to aluminium, electrochemical machining, drilling and hand fitting</p></div>
+  <div class="cap"><span>additive</span><p>TPU and rigid printing, design for print, bearingless joints, printed enclosures</p></div>
+  <div class="cap"><span>power</span><p>18650 pack building from salvage, capacity matching, nickel strip spot welding, connector current budgeting</p></div>
+  <div class="cap"><span>embedded</span><p>Arduino, ESP32, RPi Pico, IMUs, hall sensors, H-bridges, servos, BLE</p></div>
+  <div class="cap"><span>vehicle</span><p>CAN and ISO-TP, UDS diagnostics, ECU and module flashing, firmware patching</p></div>
+  <div class="cap"><span>software</span><p>Python, embedded C, control loops, MuJoCo and Isaac Sim, PPO reinforcement learning</p></div>
+  <div class="cap"><span>cad</span><p>Fusion, AutoCAD, Tinkercad, USD meshes for simulation</p></div>
+</div>
+</div>
+
+<footer>&copy; xoddx &nbsp;/&nbsp; <a href="./">full portfolio</a></footer>
+
+</body>
+</html>
