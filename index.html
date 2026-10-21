@@ -151,6 +151,12 @@ h1{font-size:18px;font-weight:400;margin-bottom:4px}
 }
 .m-title{font-size:clamp(24px,4vw,38px);line-height:1;letter-spacing:-1px}
 .m-tag{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-top:8px}
+.m-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.m-links a{
+  font-size:10.5px;letter-spacing:.5px;color:var(--dim);text-decoration:none;
+  border:1px solid #222;padding:4px 9px;transition:.2s;
+}
+.m-links a:hover{border-color:var(--hot);color:var(--hot)}
 .m-close{
   margin-left:auto;background:none;border:1px solid #222;color:var(--dim);
   font:inherit;font-size:11px;padding:7px 13px;cursor:pointer;
@@ -250,6 +256,7 @@ xoddx@proton.me &nbsp;/&nbsp; 773 536 9010</p>
       <div>
         <div class="m-title" id="m-title"></div>
         <div class="m-tag" id="m-tag"></div>
+        <div class="m-links" id="m-links"></div>
       </div>
       <button class="m-close" id="m-close">ESC / CLOSE</button>
     </div>
@@ -290,6 +297,34 @@ const P=[
      imgs:[
        {src:'gif_bikerobotics.gif',cap:'self-balancing run in the garage'},
        {src:'gif_sim.gif',cap:'MuJoCo sim, PPO policy training rollout'}
+     ]}
+  ]
+},
+{
+  id:'clusterleg', title:'clusterleg', tag:'audi/vw cluster tools + flashing deck',
+  hero:'cl_deck-flash.png',
+  links:[
+    {label:'repo',url:'https://github.com/xodq/clusterleg'},
+    {label:'built on VW_Flash',url:'https://github.com/bri3d/VW_Flash'},
+    {label:'esp32-isotp-ble-bridge',url:'https://github.com/bri3d/esp32-isotp-ble-bridge'}
+  ],
+  blurb:'instrument cluster tools and a command deck for audi/vw MQB cars, built on top of VW_Flash, where most of the credit goes. talks to the car through a DIY ESP32 CAN bridge instead of a paid diagnostic app.',
+  stages:[
+    {n:'stage 01',name:'the bridge',
+     desc:'A CAN transceiver into an ESP32 into USB-C into the laptop, in a <strong>case I designed and printed myself</strong>, standing in for a paid diagnostic tool. Getting it to reach the instrument cluster took a firmware patch: the stock bridge firmware hard-codes four CAN links and silently drops cluster traffic. I dumped the firmware, found the <strong>two instructions that set an unused link\'s CAN IDs</strong>, retargeted them to the cluster at 0x714/0x77E, then fixed the image checksum and SHA-256 so it would still boot. Binary patch, no source rebuild. The tool prepares the patched image but deliberately never flashes the bridge itself.',
+     imgs:[
+       {src:'cl_bridge.jpg',cap:'the bridge, CAN transceiver into ESP32, in a case I designed'}
+     ]},
+    {n:'stage 02',name:'cluster coding',
+     desc:'First coding writes came back refused, <strong>UDS NRC 0x24</strong>. The fix was VW\'s coding login order: workshop code F198, then date F199, then the coding itself. From there I turned on the <strong>Virtual Cockpit S sport layout</strong> on my own 2017 A3. That setting is not in long coding, it is a byte in cluster memory written after a development session login, so I captured OBDeleven\'s traffic with a passive listener I wrote, matched it against the published procedure and re-implemented it. The method is public. What is mine is doing it off a DIY bridge with my own code, and it worked on <strong>cluster software 0045</strong> where the guides all say 0069 or newer is required.',
+     imgs:[
+       {src:'cl_deck-cluster.png',cap:'cluster page, layout write staged as a dry run'}
+     ]},
+    {n:'stage 03',name:'the deck',
+     desc:'A dark ops deck in tkinter wrapping every VW_Flash action plus the cluster tools. <strong>Every button builds an editable command line</strong> that runs exactly as shown, with a queue, saved playbooks and a real Ctrl+C stop path on Windows. Flashing can <strong>start from any block or do a single block</strong>, which is how you recover a hung flash instead of redoing all five. Safety rails throughout: every write is a dry run until confirmed, coding is backed up first with a restore to stock, per-car profiles refuse a cluster that does not match, a byte known to break the fuel range estimate is locked out, and the layout write refuses unless the target bytes look right. 32 offline tests run against a simulated cluster that behaves like the real one. The tunes it flashes are my own.',
+     imgs:[
+       {src:'cl_deck-flash.png',cap:'resuming a flash at block 4'},
+       {src:'cl_deck-disclaimer.png',cap:'launch disclaimer and credits'}
      ]}
   ]
 },
@@ -470,6 +505,9 @@ function openProject(i){
   const p=P[i];
   document.getElementById('m-title').textContent=p.title;
   document.getElementById('m-tag').textContent=p.tag;
+  const lk=document.getElementById('m-links');
+  lk.innerHTML=(p.links||[]).map(l=>
+    `<a href="${l.url}" target="_blank" rel="noopener noreferrer">${l.label}</a>`).join('');
   document.getElementById('m-flag').classList.toggle('on',!!p.nonfunctional);
   stagesEl.innerHTML='';
   p.stages.forEach((s,si)=>{
